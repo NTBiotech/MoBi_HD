@@ -1,0 +1,74 @@
+#Programm zur Auswertung der potentiomtrischen Titration von Bromid und Chlorid. 
+#Bitte nicht ohne Erlaubnis teilen, hat mich viel Zeit gekostet. LG NTBiotech
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.interpolate import interp1d
+
+a = 15
+
+# Data importieren
+x_data = [            ]
+y_data = [            ]
+plt.scatter(x_data,y_data)
+plt.show
+print(len(x_data))
+x = int(0.5 * len(x_data))
+
+#interpolation
+y_f = interp1d(x_data, y_data, "cubic")
+x = np.linspace(x_data[0], x_data[-2], 99999)
+plt.plot(x, y_f(x))
+
+#Ableitung nach interp
+dxdy_f = y_f._spline.derivative(nu=1)
+plt.plot(x, dxdy_f(x))
+
+#Wendepunkte bestimmen
+c = np.where(np.isclose(x, a))
+
+max_1 = max(dxdy_f(x[:c[0][0]])) #maximum der steigung in V/ml
+max_1_ind_dxdy = np.where(np.isclose(dxdy_f(x), max_1)) # index of max_1 in dxdy(x) = index in x
+V_wende_1 = x[max_1_ind_dxdy[0][0]]  #x of max
+
+max_2 = max(dxdy_f(x[c[0][0]:])) #maximum der steigung in V/ml
+max_2_ind_dxdy = np.where(np.isclose(dxdy_f(x), max_2)) # index of max_2 in dxdy(x)
+V_wende_2 = x[max_2_ind_dxdy[0][0]]
+
+
+plt.scatter(x_data, y_data, color= "y")
+plt.plot(x, dxdy_f(x))
+plt.plot(x, y_f(x))
+plt.scatter(V_wende_1, y_f(x[max_1_ind_dxdy[0][0]]), color= "g")
+plt.scatter(V_wende_2, y_f(x[max_2_ind_dxdy[0][0]]), color= "g")
+
+# Rechnung KEINE GEWÄHR!! Bitte vor Abgabe nochmal überprüfen
+c_AgNO3 = 0.01 #mol/l
+print("c(AgNO3) " + str(c_AgNO3))
+
+K_AgCl = 1.8 * 10**-10 #(mol/l)**2
+print("K_AgCl " + str(K_AgCl))
+K_AgBr = 5.4 * 10**-13 #(mol/l)**2
+print("K_AgBr " + str(K_AgBr))
+
+M_Cl = 35.45  #g/mol
+print("M_Cl " + str(M_Cl))
+M_Br = 79.904 #g/mol
+print("M_Br " + str(M_Br))
+
+V_wende_1 = V_wende_1/1000 # ml -> l
+print("V_wende_1 " + str(V_wende_1))
+print("V_wende_2 " + str(V_wende_2))
+V_wende_2 = V_wende_2/1000 -V_wende_1 # ml -> l
+print("V_wende_2 " + str(V_wende_2))
+
+n_Br = V_wende_1 * c_AgNO3 *5 #mol
+print("n_Br " + str(n_Br))
+m_Br = n_Br * M_Br         #g
+
+n_Cl = V_wende_2 * c_AgNO3 *5 #mol
+print("n_Cl " + str(n_Cl))
+m_Cl = n_Cl * M_Cl         #g
+
+print("Masse an Br-: " + str(m_Br) + " g. Dies entspricht: " + str(m_Br*1000) + " mg.")
+print("Masse an Cl-: " + str(m_Cl) + " g. Dies entspricht: " + str(m_Cl*1000) + " mg.")
+plt.show()
